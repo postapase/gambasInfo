@@ -1,9 +1,10 @@
 # Gambas Project File 3.0
 Title=gambasinfobug
 Startup=Main
-Version=0.1.1
+Version=0.1.2
 Authors="postapase"
-Arguments=[["-f"]]
+Arguments=[["--file","-f"],["--text","-t"],["--help","-h"]]
+CurrentArgumentList=["--file","-f"]
 TabSize=2
 Language=en_US
 Maintainer=postapase
@@ -11,7 +12,7 @@ Vendor=postapase
 Address=uno.cero@live.com
 Url=https://github.com/postapase/gambasInfoBug
 License=General Public License
-PackageName=gambasinfobug-0.1.1
+PackageName=gambasinfobug-0.1.2
 Packager=1
 Systems=fedora
 Menus=fedora:"Development/Debugger"

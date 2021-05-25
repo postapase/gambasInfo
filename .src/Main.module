@@ -2,14 +2,11 @@
 
 ' comando: gambasinfobug
 ' creado por postapase 25/05/2021
+' código basado en FSystemInfo de gambas3
 
 Private FullVersionWithRevision As String
 
 Public Sub Main()
-
-  Dim sPath As String
-  Dim aText As String[]
-  Dim elemento As String
 
   Dim a As Integer
   Dim sArg As String
@@ -17,26 +14,86 @@ Public Sub Main()
   For a = 1 To Args.Max
     sArg = Args[a]
     If sArg = "--help" Or If sArg = "-h" Then
-      Version
+      PrintHelp
       Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
       Version
       Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
-      aText = GetInfo()
-      MakeAnonymous(aText)
-      For Each elemento In aText
-        Print elemento
-        Wait 0.03
-      Next
+      PrintInfo
     Else If sArg = "--file" Or If sArg = "-f" Then
-      Print "in construction"
-      Quit
+      SaveInfoInFile
     Else
       Print "unknown command --> " & sArg
     Endif
 
   Next
+
+End
+
+Public Sub PrintHelp()
+
+  version
+  Print
+  Print "gambasinfobug [argument]"
+  Print
+  Print "--help or -h print this help"
+  Print "--texto or -t print system information on screen"
+  Print "--file or -f Save system information in SystemInfobug"
+  Print "(in current directory)"
+
+End
+
+Public Sub PrintInfo()
+
+  Dim sElement As String
+  Dim aText As String[]
+
+  aText = GetInfo()
+  MakeAnonymous(aText)
+  For Each sElement In aText
+    Print sElement
+    Wait 0.03
+  Next
+
+  Quit
+
+End
+
+Public Sub SaveInfoInFile()
+
+  Dim sElement As String
+  Dim sTextFile As String
+  Dim sPathCurrent As String
+  Dim sPathEnd As String
+  Dim aText As String[]
+
+  aText = GetInfo()
+  MakeAnonymous(aText)
+  For Each sElement In aText
+    sTextFile &= sElement & gb.NewLine
+  Next
+
+  Shell "pwd" To sPathCurrent
+
+  sPathEnd = Replace(sPathCurrent, gb.NewLine, "") &/ "SystemInfoForBug"
+
+  Try Kill sPathEnd
+
+  Try File.Save(sPathEnd, sTextFile)
+
+  If Error Then
+    Print Error.Text & gb.NewLine & Error.Where
+  Else
+    If Exist(sPathEnd) Then
+      Print "File created successfully in:" & gb.NewLine & sPathEnd
+      Print
+    Else
+      Print "Error trying to create file"
+    Endif
+  Endif
+
+  Quit
 
 End
 
