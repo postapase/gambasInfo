@@ -15,7 +15,6 @@ Public Sub Main()
     sArg = Args[a]
     If sArg = "--help" Or If sArg = "-h" Then
       PrintHelp
-      Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
       Version
       Quit
@@ -34,6 +33,7 @@ End
 Public Sub PrintHelp()
 
   version
+
   Print
   Print "gambasinfobug [argument]"
   Print
@@ -41,6 +41,8 @@ Public Sub PrintHelp()
   Print "--texto or -t print system information on screen"
   Print "--file or -f Save system information in SystemInfobug"
   Print "(in current directory)"
+
+  Quit
 
 End
 
@@ -100,7 +102,7 @@ End
 Public Sub Version()
 
   Print Application.Name & " version " & Application.Version
-  Print "by postapase"
+  Print "by postapase (uno.cero@live.com)"
 
 End
 
@@ -137,8 +139,6 @@ Public Sub GetInfo() As String[]
   aText.Add(Application.Title & " version " & Application.Version & gb.NewLine)
 
   aText.Add("[System]")
-  ' getting Version: set to FullVersionWithRevision at Project.initVersion (estaba comentada)
-  ' aText.Add("Gambas=" & Project.FullVersionWithRevision) 'origianl
 
   VersionGambas
 
