@@ -1,0 +1,19 @@
+# Gambas Project File 3.0
+Title=gambasinfobug
+Startup=Main
+Version=0.1.1
+Authors="postapase"
+TabSize=2
+Language=en_US
+Maintainer=postapase
+Vendor=postapase
+Address=uno.cero@live.com
+Url=https://sourceforge.net/projects/visorrv1960/
+License=General Public License
+Prefix=1
+PackageName=postapase-gambasinfobug-0.0.1
+Packager=1
+Systems=fedora
+Menus=fedora:"Development/Debugger"
+Categories=fedora:"Debugger;Development"
+Groups=fedora:"Development/Tools"

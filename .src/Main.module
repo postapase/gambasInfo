@@ -1,0 +1,225 @@
+' Gambas module file
+
+' Private $sInfo As String
+Private FullVersionWithRevision As String
+
+Public Sub Main()
+
+  Dim sPath As String
+  Dim aText As String[]
+  Dim elemento As String
+
+  aText = GetInfo()
+  MakeAnonymous(aText)
+
+  For Each elemento In aText
+    Print elemento
+    Wait 0.03
+  Next
+
+End
+
+Sub MakeAnonymous(aText As String[])
+
+  Dim I As Integer
+  Dim sText As String
+
+  For I = 0 To aText.Max
+    sText = Replace(aText[I], System.Host, "<hostname>")
+    sText = Replace(sText, User.Home, "<home>")
+    aText[I] = Replace(sText, User.Name, "<user>")
+
+  Next
+
+End
+
+Public Sub GetInfo() As String[]
+
+  Dim aText As New String[]
+  Dim sTemp As String
+  Dim cSearch As Collection
+  Dim cFile As Collection
+  Dim sDir As String
+  Dim sFile As String
+  Dim sPattern As String
+  Dim aLib As New String[]
+  Dim aSearchPath As New String[]
+  Dim sVar As String
+  Dim aEnv As String[]
+  Dim sTab As String = "   "
+
+  aText.Add("[System]")
+  ' getting Version: set to FullVersionWithRevision at Project.initVersion (estaba comentada)
+  ' aText.Add("Gambas=" & Project.FullVersionWithRevision) 'origianl
+
+  VersionGambas
+
+  aText.Add(sTab & "Gambas=" & FullVersionWithRevision) 'prueba
+
+  aText.Add(sTab & "OperatingSystem=" & System.Family)
+
+  Exec ["uname", "-r"] To sTemp
+  aText.Add(sTab & "Kernel=" & Trim(sTemp))
+
+  aText.Add(sTab & "Architecture=" & System.Architecture)
+  aText.Add(sTab & "Distribution=" & GetDistribution())
+
+  'crear codigo
+  ' aText.Add("Desktop=" & Desktop.Type)
+
+  ' aText.Add("Font=" & Application.Font.ToString())'original
+  aText.Add(sTab & "Font=" & "?")
+
+  ' aText.Add("Scale=" & Desktop.Scale)
+  ' aText.Add("Theme=" & Style.Name)
+  ' aText.Add("Language=" & System.Language)
+
+  If System.Family = "FreeBSD" Then
+    Exec ["sysctl", "-n", "hw.physmem"] To sTemp
+    sTemp = CStr(CLong(Trim(sTemp)) \ 1024)
+  Else
+    Exec ["cat", "/proc/meminfo"] To sTemp
+    Try sTemp = Scan(sTemp, "*MemTotal:*\n*")[1]
+    If Error Then
+      sTemp = ""
+    Else
+      While Not IsDigit(Right(sTemp))
+        sTemp = Left(sTemp, -1)
+      Wend
+      sTemp = Trim(sTemp)
+    Endif
+  Endif
+
+  If sTemp Then
+    Try sTemp = Format(CInt(sTemp) / 1024, "0") & "M"
+    If Not Error Then aText.Add(sTab & "Memory=" & sTemp)
+  Endif
+
+  If System.Family = "Cygwin" Then
+
+    aSearchPath = ["/bin", "/usr/lib"]
+
+    cSearch = ["QT4": "cygQtCore*.dll", "QT5": "cygQt5Core*.dll", "GTK+2": "cyggtk-x11-2*.dll", "GTK+3": "cyggtk-3-*.dll", "SDL": "cygSDL-*.dll", "GStreamer": "cyggstreamer-*.dll", "Poppler": "cygpoppler-*.dll", "Curl": "cygcurl-*.dll", "OpenGL": "cygGL-*.dll",
+      "Cairo": "cygcairo-[0-9]*.dll", "DBus": "cygdbus-[0-9]*.dll", "SQLite 3": "libsqlite3*.dll"]
+
+  Else
+
+    sVar = Env["LIBPATH"]
+    Print sVar
+    If sVar Then
+      aSearchPath = Split(sVar, ":")
+    Else
+      aSearchPath = ["/usr/lib"]
+    Endif
+
+    cSearch = ["QT4": "libQtCore.so.*.*.*", "QT5": "libQt5Core.so.*.*.*", "GDK2": "libgdk-x11-2*.so.*.*.*", "GTK+2": "libgtk-x11-2*.so.*.*.*", "GDK3": "libgdk-3*.so.*.*.*", "GTK+3": "libgtk-3*.so.*.*.*", "SDL": "libSDL-1.*.so.*.*.*", "GStreamer": "libgstreamer-*.so.*.*.*", "Poppler": "libpoppler.so.*.*.*", "Curl": "libcurl.so.*.*.*",
+      "OpenGL": "libGL.so.*.*.*", "Cairo": "libcairo.so.*.*.*", "DBus": "libdbus-[0-9].so.*.*.*", "SQLite": "libsqlite3.so.*.*.*"]
+
+  Endif
+
+  If Stat("/lib", False).Type = gb.Directory Then 'Some systems link /lib to /usr/lib
+    aSearchPath.Add("/lib", 0)
+  Endif
+
+  cFile = New Collection
+  aText.Add("")
+  aText.Add("[Libraries]")
+
+  For Each sDir In aSearchPath
+    For Each sFile In RDir(sDir, "", gb.File, False)
+      sFile = File.Name(sFile)
+      For Each sPattern In cSearch
+        If sFile Like sPattern And If Not cFile.Exist(sFile) Then
+          aLib.Add(sTab & cSearch.Key & "=" & sFile)
+          cFile[sFile] = True
+          Break
+        Endif
+      Next
+    Next
+  Next
+
+  aText.Insert(aLib.Sort())
+
+  aText.Add("")
+  aText.Add("[Environment]")
+
+  aEnv = New String[]
+  For Each sVar In Env
+    aEnv.Add(sVar)
+  Next
+  aEnv.Sort
+
+  For Each sVar In aEnv
+    aText.Add(sTab & sVar & "=" & Env[sVar])
+  Next
+
+  Return aText
+
+End
+
+Private Sub GetDistribution() As String
+
+  Dim cDist As Collection = ["lsb-release": "/etc/lsb-release", "vector": "/etc/vector-version", "slackware": "/etc/slackware-version", "debian": "/etc/debian_version",
+    "redhat": "/etc/redhat-release", "arch": "/etc/arch-release", "SuSE": "/etc/os-release", "gentoo": "/etc/gentoo-release", "conectiva": "/etc/conectiva-release",
+    "mandriva": "/etc/mandriva-release", "pardus": "/etc/pardus-release", "kanotix": "/etc/kanotix-release"]
+
+  Dim sPath As String
+  Dim sDistro As String
+  Dim cData As Collection
+  Dim iPos As Integer
+
+  For Each sPath In cDist
+    sDistro = cDist.Key
+
+    If Not Exist(sPath) Then Continue
+
+    If sDistro = "lsb-release" Then
+      cData = ReadLsbRelease(sPath)
+      sDistro = cData["DISTRIB_DESCRIPTION"]
+      If sDistro Then Return sDistro
+      Return cData["DISTRIB_ID"] & " " & cData["DISTRIB_RELEASE"]
+    Else
+      Return sDistro & " " & Trim(File.Load(sPath))
+    Endif
+
+  Next
+
+  If Exist("/etc/issue") Then
+    sDistro = File.Load("/etc/issue")
+    If sDistro Then
+      iPos = InStr(sDistro, "\\")
+      If iPos Then sDistro = Left(sDistro, iPos - 1)
+    Endif
+  Else
+    Exec ["uname", "-s"] To sDistro
+  Endif
+  Return Trim(sDistro)
+
+End
+
+Private Sub ReadLsbRelease(sPath As String) As Collection
+
+  Dim cCol As New Collection
+  Dim sLine As String
+  Dim aLine As String[]
+
+  For Each sLine In Split(File.Load(sPath), "\n", "", True)
+
+    aLine = Scan(sLine, "*=*")
+    Try cCol[aLine[0]] = UnQuote(aLine[1])
+
+  Next
+
+  Return cCol
+
+End
+
+Private Sub VersionGambas()
+
+  Dim sVer As String
+
+  Exec [System.Path &/ "bin/gbx" & System.Version, "-V"] To sVer
+  FullVersionWithRevision = Trim(sVer)
+  If FullVersionWithRevision Ends ".0" Then FullVersionWithRevision = Left$(FullVersionWithRevision, -2)
+
+End
