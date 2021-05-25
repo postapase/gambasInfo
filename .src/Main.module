@@ -11,13 +11,38 @@ Public Sub Main()
   Dim aText As String[]
   Dim elemento As String
 
-  aText = GetInfo()
-  MakeAnonymous(aText)
+  Dim a As Integer
+  Dim sArg As String
 
-  For Each elemento In aText
-    Print elemento
-    Wait 0.03
+  For a = 1 To Args.Max
+    sArg = Args[a]
+    If sArg = "--help" Or If sArg = "-h" Then
+      Version
+      Quit
+    Else If sArg = "--version" Or If sArg = "-v" Then
+
+    Else If sArg = "--text" Or If sArg = "-t" Then
+      aText = GetInfo()
+      MakeAnonymous(aText)
+      For Each elemento In aText
+        Print elemento
+        Wait 0.03
+      Next
+    Else If sArg = "--file" Or If sArg = "-f" Then
+      Print "in construction"
+      Quit
+    Else
+      Print "unknown command --> " & sArg
+    Endif
+
   Next
+
+End
+
+Public Sub Version()
+
+  Print Application.Name & " version " & Application.Version
+  Print "by postapase"
 
 End
 
@@ -30,7 +55,6 @@ Sub MakeAnonymous(aText As String[])
     sText = Replace(aText[I], System.Host, "<hostname>")
     sText = Replace(sText, User.Home, "<home>")
     aText[I] = Replace(sText, User.Name, "<user>")
-
   Next
 
 End
@@ -48,7 +72,11 @@ Public Sub GetInfo() As String[]
   Dim aSearchPath As New String[]
   Dim sVar As String
   Dim aEnv As String[]
+
   Dim sTab As String = "   "
+  Dim sLANG As String
+
+  aText.Add(Application.Title & " version " & Application.Version & gb.NewLine)
 
   aText.Add("[System]")
   ' getting Version: set to FullVersionWithRevision at Project.initVersion (estaba comentada)
@@ -74,7 +102,16 @@ Public Sub GetInfo() As String[]
 
   ' aText.Add("Scale=" & Desktop.Scale)
   ' aText.Add("Theme=" & Style.Name)
-  ' aText.Add("Language=" & System.Language)
+
+  Try Shell "locale | grep LANG=" To sLANG
+
+  If Error Then
+    sLANG = "?"
+  Else
+    sLANG = Trim(Split(sLANG, "=")[1])
+  Endif
+
+  aText.Add(sTab & "Language=" & sLANG)
 
   If System.Family = "FreeBSD" Then
     Exec ["sysctl", "-n", "hw.physmem"] To sTemp
