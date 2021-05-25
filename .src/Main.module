@@ -20,7 +20,8 @@ Public Sub Main()
       Version
       Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
-
+      Version
+      Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
       aText = GetInfo()
       MakeAnonymous(aText)
