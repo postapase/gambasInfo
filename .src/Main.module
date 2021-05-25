@@ -1,6 +1,8 @@
 ' Gambas module file
 
-' Private $sInfo As String
+' comando: gambasinfobug
+' creado por postapase 25/05/2021
+
 Private FullVersionWithRevision As String
 
 Public Sub Main()
