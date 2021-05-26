@@ -4,7 +4,7 @@
 ' creado por postapase 25/05/2021
 ' código basado en FSystemInfo de gambas3
 
-Private FullVersionWithRevision As String
+Private sTab As String = "   "
 
 Public Sub Main()
 
@@ -15,34 +15,39 @@ Public Sub Main()
     sArg = Args[a]
     If sArg = "--help" Or If sArg = "-h" Then
       PrintHelp
+      Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
       Version
       Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
       PrintInfo
+      Quit
     Else If sArg = "--file" Or If sArg = "-f" Then
       SaveInfoInFile
+      Quit
     Else
       Print "unknown command --> " & sArg
     Endif
-
   Next
+
+  PrintHelp
+  Quit
 
 End
 
 Public Sub PrintHelp()
 
-  version
-
   Print
   Print "gambasinfobug [argument]"
   Print
-  Print "--help or -h print this help"
-  Print "--texto or -t print system information on screen"
-  Print "--file or -f Save system information in SystemInfobug"
-  Print "(in current directory)"
-
-  Quit
+  Print sTab & "-h, --help   print this help"
+  Print sTab & "-t, --texto  print system information on screen"
+  Print sTab & "-f, --file   Save system info in file SystemInfoForBug"
+  Print sTab & "             (in current directory)"
+  Print
+  Print "Scheduled by postapase"
+  Print "Report bugs: uno.cero@live.com"
+  Print
 
 End
 
@@ -57,8 +62,6 @@ Public Sub PrintInfo()
     Print sElement
     Wait 0.03
   Next
-
-  Quit
 
 End
 
@@ -95,14 +98,11 @@ Public Sub SaveInfoInFile()
     Endif
   Endif
 
-  Quit
-
 End
 
 Public Sub Version()
 
   Print Application.Name & " version " & Application.Version
-  Print "by postapase (uno.cero@live.com)"
 
 End
 
@@ -119,10 +119,34 @@ Sub MakeAnonymous(aText As String[])
 
 End
 
-Public Sub GetInfo() As String[]
+Public Sub GetLang() As String
 
-  Dim aText As New String[]
+  Dim sLANG As String
+
+  Try Shell "locale | grep LANG= | cut -d '=' -f 2" To sLANG
+
+  If Error Then
+    sLANG = "?"
+  Else
+    sLANG = Trim(Replace(sLANG, gb.NewLine, ""))
+  Endif
+
+  Return sLANG
+
+End
+
+Public Sub GetKernel() As String
+
   Dim sTemp As String
+
+  Exec ["uname", "-r"] To sTemp
+
+  Return Trim(sTemp)
+
+End
+
+Public Sub GetLibraries() As String[]
+
   Dim cSearch As Collection
   Dim cFile As Collection
   Dim sDir As String
@@ -131,66 +155,6 @@ Public Sub GetInfo() As String[]
   Dim aLib As New String[]
   Dim aSearchPath As New String[]
   Dim sVar As String
-  Dim aEnv As String[]
-
-  Dim sTab As String = "   "
-  Dim sLANG As String
-
-  aText.Add(Application.Title & " version " & Application.Version & gb.NewLine)
-
-  aText.Add("[System]")
-
-  VersionGambas
-
-  aText.Add(sTab & "Gambas=" & FullVersionWithRevision) 'prueba
-
-  aText.Add(sTab & "OperatingSystem=" & System.Family)
-
-  Exec ["uname", "-r"] To sTemp
-  aText.Add(sTab & "Kernel=" & Trim(sTemp))
-
-  aText.Add(sTab & "Architecture=" & System.Architecture)
-  aText.Add(sTab & "Distribution=" & GetDistribution())
-
-  'crear codigo
-  ' aText.Add("Desktop=" & Desktop.Type)
-
-  ' aText.Add("Font=" & Application.Font.ToString())'original
-  aText.Add(sTab & "Font=" & "?")
-
-  ' aText.Add("Scale=" & Desktop.Scale)
-  ' aText.Add("Theme=" & Style.Name)
-
-  Try Shell "locale | grep LANG=" To sLANG
-
-  If Error Then
-    sLANG = "?"
-  Else
-    sLANG = Trim(Split(sLANG, "=")[1])
-  Endif
-
-  aText.Add(sTab & "Language=" & sLANG)
-
-  If System.Family = "FreeBSD" Then
-    Exec ["sysctl", "-n", "hw.physmem"] To sTemp
-    sTemp = CStr(CLong(Trim(sTemp)) \ 1024)
-  Else
-    Exec ["cat", "/proc/meminfo"] To sTemp
-    Try sTemp = Scan(sTemp, "*MemTotal:*\n*")[1]
-    If Error Then
-      sTemp = ""
-    Else
-      While Not IsDigit(Right(sTemp))
-        sTemp = Left(sTemp, -1)
-      Wend
-      sTemp = Trim(sTemp)
-    Endif
-  Endif
-
-  If sTemp Then
-    Try sTemp = Format(CInt(sTemp) / 1024, "0") & "M"
-    If Not Error Then aText.Add(sTab & "Memory=" & sTemp)
-  Endif
 
   If System.Family = "Cygwin" Then
 
@@ -219,8 +183,6 @@ Public Sub GetInfo() As String[]
   Endif
 
   cFile = New Collection
-  aText.Add("")
-  aText.Add("[Libraries]")
 
   For Each sDir In aSearchPath
     For Each sFile In RDir(sDir, "", gb.File, False)
@@ -235,20 +197,85 @@ Public Sub GetInfo() As String[]
     Next
   Next
 
-  aText.Insert(aLib.Sort())
+  Return aLib.Sort()
 
-  aText.Add("")
-  aText.Add("[Environment]")
+End
 
-  aEnv = New String[]
+Public Sub GetMemory() As String
+
+End
+
+Public Sub GetEnvironment() As String[]
+
+  Dim aText As New String[]
+  Dim sVar As String
+  Dim aEnv As New String[]
+
   For Each sVar In Env
     aEnv.Add(sVar)
   Next
-  aEnv.Sort
 
   For Each sVar In aEnv
-    aText.Add(sTab & sVar & "=" & Env[sVar])
+    aText.Add(sTab & sVar & "= " & Env[sVar])
   Next
+
+  Return aText.Sort()
+
+End
+
+Public Sub GetInfo() As String[]
+
+  Dim aText As New String[]
+  Dim sTemp As String
+
+  aText.Add(Application.Title & " version " & Application.Version & gb.NewLine)
+
+  aText.Add("[System]")
+  aText.Add(sTab & "Gambas= " & VersionGambas())
+  aText.Add(sTab & "OperatingSystem= " & System.Family)
+  aText.Add(sTab & "Kernel= " & GetKernel())
+  aText.Add(sTab & "Architecture= " & System.Architecture)
+  aText.Add(sTab & "Distribution= " & GetDistribution())
+  aText.Add(sTab & "Desktop= " & Env["XDG_CURRENT_DESKTOP"])
+
+  ' aText.Add("Font=" & Application.Font.ToString())'original
+  aText.Add(sTab & "Font= " & "?")
+
+  ' aText.Add("Scale=" & Desktop.Scale)
+  aText.Add(sTab & "Scale= " & "?")
+  ' aText.Add("Theme=" & Style.Name)
+  aText.Add(sTab & "Theme=" & "?")
+
+  aText.Add(sTab & "Language= " & GetLang())
+
+  If System.Family = "FreeBSD" Then
+    Exec ["sysctl", "-n", "hw.physmem"] To sTemp
+    sTemp = CStr(CLong(Trim(sTemp)) \ 1024)
+  Else
+    Exec ["cat", "/proc/meminfo"] To sTemp
+    Try sTemp = Scan(sTemp, "*MemTotal:*\n*")[1]
+    If Error Then
+      sTemp = ""
+    Else
+      While Not IsDigit(Right(sTemp))
+        sTemp = Left(sTemp, -1)
+      Wend
+      sTemp = Trim(sTemp)
+    Endif
+  Endif
+
+  If sTemp Then
+    Try sTemp = Format(CInt(sTemp) / 1024, "0") & "M"
+    If Not Error Then aText.Add(sTab & "Memory= " & sTemp)
+  Endif
+
+  aText.Add("")
+  aText.Add("[Libraries]")
+  aText.Insert(GetLibraries())
+
+  aText.Add("")
+  aText.Add("[Environment]")
+  aText.Insert(GetEnvironment())
 
   Return aText
 
@@ -311,12 +338,15 @@ Private Sub ReadLsbRelease(sPath As String) As Collection
 
 End
 
-Private Sub VersionGambas()
+Private Sub VersionGambas() As String
 
   Dim sVer As String
+  Dim FullVersionWithRevision As String
 
   Exec [System.Path &/ "bin/gbx" & System.Version, "-V"] To sVer
   FullVersionWithRevision = Trim(sVer)
   If FullVersionWithRevision Ends ".0" Then FullVersionWithRevision = Left$(FullVersionWithRevision, -2)
+
+  Return FullVersionWithRevision
 
 End

@@ -1,12 +1,12 @@
 # Gambas Project File 3.0
-Title=gambasinfobug
+Title=gambasInfoBug
 Startup=Main
 Icon=iTerm-24.png
-Version=0.1.3
+Version=0.1.5
 Description="Obtiene información de systema para los informes de Bugtracker de gambas3\n(basado en el código del formulario FSystemInfo de gambas3)"
 Authors="postapase"
 Arguments=[["--file","-f"],["--text","-t"],["--help","-h"]]
-CurrentArgumentList=["--help","-h"]
+CurrentArgumentList=["--text","-t"]
 TabSize=2
 Language=en_US
 Maintainer=postapase
@@ -14,7 +14,7 @@ Vendor=postapase
 Address=uno.cero@live.com
 Url=https://github.com/postapase/gambasInfoBug
 License=General Public License
-PackageName=gambasinfobug-0.1.3
+PackageName=gambasinfobug-0.1.4
 Packager=1
 Systems=fedora,ubuntu
 Menus=archlinux:"Applications/System/Administration"
