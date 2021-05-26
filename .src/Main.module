@@ -17,7 +17,7 @@ Public Sub Main()
       PrintHelp
       Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
-      Version
+      Print GetVersion()
       Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
       PrintInfo
@@ -100,9 +100,9 @@ Public Sub SaveInfoInFile()
 
 End
 
-Public Sub Version()
+Public Sub GetVersion() As String
 
-  Print Application.Name & " version " & Application.Version
+  Return Application.Name & " version " & Application.Version
 
 End
 
@@ -189,7 +189,7 @@ Public Sub GetLibraries() As String[]
       sFile = File.Name(sFile)
       For Each sPattern In cSearch
         If sFile Like sPattern And If Not cFile.Exist(sFile) Then
-          aLib.Add(sTab & cSearch.Key & "=" & sFile)
+          aLib.Add(sTab & cSearch.Key & "= " & sFile)
           cFile[sFile] = True
           Break
         Endif
