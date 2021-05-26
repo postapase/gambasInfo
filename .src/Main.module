@@ -228,8 +228,10 @@ Public Sub GetInfo() As String[]
   Dim aText As New String[]
   Dim sTemp As String
 
-  aText.Add(Application.Title & " version " & Application.Version & gb.NewLine)
+  aText.Add(Application.Title & " version " & Application.Version)
+  aText.Add(String.UCaseFirst(CStr(Format(Date, gb.LongDate)) & " - " & CStr(Format(Now, "hh:mm"))))
 
+  aText.Add("")
   aText.Add("[System]")
   aText.Add(sTab & "Gambas= " & VersionGambas())
   aText.Add(sTab & "OperatingSystem= " & System.Family)
