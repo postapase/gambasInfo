@@ -11,16 +11,27 @@ Public Sub Main()
   Dim a As Integer
   Dim sArg As String
 
+  Try Component.Load("gb.settings")
+
+  Print IIf(Component.IsLoaded("gb.settings"), " Componente gb.Desktop instalado ", " no instalado ")
+
   For a = 1 To Args.Max
     sArg = Args[a]
     If sArg = "--help" Or If sArg = "-h" Then
+      Print Desktop.Scale
       PrintHelp
+      Quit
+    Else If sArg = "--clipboard" Or If sArg = "-c" Then
+      CopyClipboard
       Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
       Print GetVersion()
       Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
       PrintInfo
+      Quit
+    Else If sArg = "--places" Or If sArg = "-p" Then
+      PrintPlaces
       Quit
     Else If sArg = "--file" Or If sArg = "-f" Then
       SaveInfoInFile
@@ -32,6 +43,13 @@ Public Sub Main()
 
   PrintHelp
   Quit
+
+End
+
+Public Sub PrintPlaces()
+
+  Print "Settings Default Dir: " & mPlaces.SettingDefaultDir()
+  Print "Downloaded projects: "
 
 End
 
@@ -48,6 +66,10 @@ Public Sub PrintHelp()
   Print "Scheduled by postapase"
   Print "Report bugs: uno.cero@live.com"
   Print
+
+End
+
+Public Sub CopyClipboard()
 
 End
 
@@ -203,6 +225,29 @@ End
 
 Public Sub GetMemory() As String
 
+  Dim sTemp As String
+
+  If System.Family = "FreeBSD" Then
+    Exec ["sysctl", "-n", "hw.physmem"] To sTemp
+    sTemp = CStr(CLong(Trim(sTemp)) \ 1024)
+  Else
+    Exec ["cat", "/proc/meminfo"] To sTemp
+    Try sTemp = Scan(sTemp, "*MemTotal:*\n*")[1]
+    If Error Then
+      sTemp = ""
+    Else
+      While Not IsDigit(Right(sTemp))
+        sTemp = Left(sTemp, -1)
+      Wend
+      sTemp = Trim(sTemp)
+    Endif
+  Endif
+
+  If sTemp Then
+    Try sTemp = Format(CInt(sTemp) / 1024, "0") & "M"
+    If Not Error Then Return sTemp
+  Endif
+
 End
 
 Public Sub GetEnvironment() As String[]
@@ -226,7 +271,6 @@ End
 Public Sub GetInfo() As String[]
 
   Dim aText As New String[]
-  Dim sTemp As String
 
   aText.Add(Application.Title & " version " & Application.Version)
   aText.Add(String.UCaseFirst(CStr(Format(Date, gb.LongDate)) & " - " & CStr(Format(Now, "hh:mm"))))
@@ -249,27 +293,7 @@ Public Sub GetInfo() As String[]
   aText.Add(sTab & "Theme=" & "?")
 
   aText.Add(sTab & "Language= " & GetLang())
-
-  If System.Family = "FreeBSD" Then
-    Exec ["sysctl", "-n", "hw.physmem"] To sTemp
-    sTemp = CStr(CLong(Trim(sTemp)) \ 1024)
-  Else
-    Exec ["cat", "/proc/meminfo"] To sTemp
-    Try sTemp = Scan(sTemp, "*MemTotal:*\n*")[1]
-    If Error Then
-      sTemp = ""
-    Else
-      While Not IsDigit(Right(sTemp))
-        sTemp = Left(sTemp, -1)
-      Wend
-      sTemp = Trim(sTemp)
-    Endif
-  Endif
-
-  If sTemp Then
-    Try sTemp = Format(CInt(sTemp) / 1024, "0") & "M"
-    If Not Error Then aText.Add(sTab & "Memory= " & sTemp)
-  Endif
+  aText.Add(sTab & "Memory= " & GetMemory())
 
   aText.Add("")
   aText.Add("[Libraries]")
