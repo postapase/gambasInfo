@@ -11,14 +11,9 @@ Public Sub Main()
   Dim a As Integer
   Dim sArg As String
 
-  Try Component.Load("gb.settings")
-
-  Print IIf(Component.IsLoaded("gb.settings"), " Componente gb.Desktop instalado ", " no instalado ")
-
   For a = 1 To Args.Max
     sArg = Args[a]
     If sArg = "--help" Or If sArg = "-h" Then
-      Print Desktop.Scale
       PrintHelp
       Quit
     Else If sArg = "--clipboard" Or If sArg = "-c" Then

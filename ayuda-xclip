@@ -1,6 +1,0 @@
-Puedes introducir en el portapapeles directamente el contenido
-de un fichero de la siguiente forma:
-
-xclip /path/to/file
-
-Asegúrate de que lo estás utilizando; de lo alias xclip="xclip -selection c" contrario, no puedes usar Ctrl+ vpara pegarlo en un lugar diferente.
