@@ -1,10 +1,85 @@
 ' Gambas module file
 
-Public Sub SettingDefaultDir() As String
+Public Sub GetSettingDefaultDir() As String
 
   Dim sPath As String = Application.Env["XDG_CONFIG_HOME"]
 
   If Not sPath Then sPath = System.User.Home &/ ".config"
   Return sPath &/ "gambas" & System.Version
+
+End
+
+Public Sub GetGbsPath() As String
+
+  Dim sPath As String
+
+  Shell "which gbs" & System.Version To sPath
+
+  Return Replace(sPath, gb.NewLine, Null)
+
+End
+
+Public Sub GetGbxPath() As String
+
+  Dim sPath As String
+
+  Shell "which gbx" & System.Version To sPath
+
+  Return Replace(sPath, gb.NewLine, Null)
+
+End
+
+Public Sub GetGbxVersion() As String
+
+  Dim sPath As String
+
+  Shell "gbx" & System.Version & " -V" To sPath
+
+  Return Replace(sPath, gb.NewLine, Null)
+
+End
+
+'gbx3 -V
+
+Public Sub GetPathGambas3() As String
+
+  Dim sPath As String
+
+  Shell "which gambas3" To sPath
+
+  Return Replace(sPath, gb.NewLine, Null)
+
+End
+
+Public Sub GetGbsVersion() As String
+
+  Dim sPath As String
+
+  Shell "gbs" & System.Version & " -V" To sPath
+
+  Return Replace(sPath, gb.NewLine, Null)
+
+End
+
+Public Sub GetGambas3Version() As String
+
+  Dim sPath As String
+  Dim aPart As String[]
+
+  Shell "gambas3 -V" To sPath
+
+  aPart = Split(sPath, gb.NewLine)
+
+  Return aPart[0]
+
+End
+
+Public Sub GetDirExamples() As String
+
+  Dim sDirExamples As String
+
+  sDirExamples = System.Path &/ "share/gambas" & Split(System.Version, ".")[0] & "/examples"
+
+  Return sDirExamples
 
 End

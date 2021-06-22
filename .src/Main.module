@@ -20,7 +20,7 @@ Public Sub Main()
       CopyClipboard
       Quit
     Else If sArg = "--version" Or If sArg = "-v" Then
-      Print GetVersion()
+      Print GetMeVersion()
       Quit
     Else If sArg = "--text" Or If sArg = "-t" Then
       PrintInfo
@@ -43,8 +43,20 @@ End
 
 Public Sub PrintPlaces()
 
-  Print "Settings Default Dir: " & mPlaces.SettingDefaultDir()
-  Print "Downloaded projects: "
+  Print GetTitleVersion() & " (Places)"
+  Print GetCurrentDate() & gb.NewLine
+  Print "[Folders]"
+  Print "Settings Default Dir -> " & mPlaces.GetSettingDefaultDir()
+  Print "Examples Directory -> " & mPlaces.GetDirExamples()
+  Print "Downloaded projects -> "
+  Print gb.NewLine & "[Programs]"
+  Print "gbs3 " & mPlaces.GetGbsVersion() & " -> " & mPlaces.GetGbsPath()
+  Print "gbx3 " & mPlaces.GetGbxVersion() & " -> " & mPlaces.GetGbxPath()
+  Print "gambas3 " & mPlaces.GetGambas3Version() & " -> " & mPlaces.GetPathGambas3()
+  Print gb.NewLine & "[Urls]"
+  Print "WIKI_URL -> " & "http://gambaswiki.org"
+  Print "WIKI_ROOT -> " & "http://gambaswiki.org/wiki"
+  Print "timestamp -> " & "https://gambaswiki.org/timestamp"
 
 End
 
@@ -55,6 +67,7 @@ Public Sub PrintHelp()
   Print
   Print sTab & "-h, --help   print this help"
   Print sTab & "-t, --texto  print system information on screen"
+  Print sTab & "-p, --places print job directories and executables"
   Print sTab & "-f, --file   Save system info in file SystemInfoForBug"
   Print sTab & "             (in current directory)"
   Print
@@ -117,7 +130,7 @@ Public Sub SaveInfoInFile()
 
 End
 
-Public Sub GetVersion() As String
+Public Sub GetMeVersion() As String
 
   Return Application.Name & " version " & Application.Version
 
@@ -267,8 +280,8 @@ Public Sub GetInfo() As String[]
 
   Dim aText As New String[]
 
-  aText.Add(Application.Title & " version " & Application.Version)
-  aText.Add(String.UCaseFirst(CStr(Format(Date, gb.LongDate)) & " - " & CStr(Format(Now, "hh:mm"))))
+  aText.Add(GetTitleVersion() & " (for bug)")
+  aText.Add(GetCurrentDate())
 
   aText.Add("")
   aText.Add("[System]")
@@ -369,5 +382,17 @@ Private Sub VersionGambas() As String
   If FullVersionWithRevision Ends ".0" Then FullVersionWithRevision = Left$(FullVersionWithRevision, -2)
 
   Return FullVersionWithRevision
+
+End
+
+Public Sub GetCurrentDate() As String
+
+  Return String.UCaseFirst(CStr(Format(Date, gb.LongDate)) & " - " & CStr(Format(Now, "hh:mm")))
+
+End
+
+Public Sub GetTitleVersion() As String
+
+  Return Application.Title & " " & Application.Version
 
 End
