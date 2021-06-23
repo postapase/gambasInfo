@@ -2,7 +2,7 @@
 Title=gambasInfoBug
 Startup=Main
 Icon=iTerm-24.png
-Version=0.1.6
+Version=0.1.7
 Description="Obtiene información de systema para los informes de Bugtracker de gambas3\n(basado en el código del formulario FSystemInfo de gambas3)"
 Authors="postapase"
 Arguments=[["--text","-t"],["--help","-h"],["--file","-f"],["--clipboard","-c"],["--places","-p"],["--open","-o"]]
