@@ -25,6 +25,12 @@ Public Sub Main()
     Else If sArg = "--text" Or If sArg = "-t" Then
       PrintInfo
       Quit
+    Else If sArg = "--open" Or If sArg = "-o" Then
+      If Args.Count = 3 Then
+        OpenDir(Args[2])
+      Else
+
+      Endif
     Else If sArg = "--places" Or If sArg = "-p" Then
       PrintPlaces
       Quit
@@ -32,11 +38,41 @@ Public Sub Main()
       SaveInfoInFile
       Quit
     Else
-      Print "unknown command --> " & sArg
+      Print "unknown command --> " & sArg[1]
     Endif
   Next
 
   PrintHelp
+  Quit
+
+End
+
+Public Sub OpenDir(sArg As String)
+
+  If IsDir(sArg) Then
+    Shell "xdg-open " & sArg
+  Else
+    Select Case sArg
+      Case "config"
+        Shell "xdg-open " & mPlaces.GetSettingDefaultDir()
+      Case "src"
+        Shell "xdg-open " & mPlaces.GetDirSrc()
+      Case "examples"
+        Shell "xdg-open " & mPlaces.GetDirExamples()
+      Case "template"
+        Shell "xdg-open " & mPlaces.GetDirTemplate()
+      Case "localtemplate"
+        Shell "xdg-open " & mPlaces.GetDirLocalTemplate()
+      Case Else
+        Print "unknown argument -> " & Args[2]
+        Print
+        Print "arguments available to [--open] or [-o]"
+        Print "config (-o config, --open config)"
+        Print "src, examples, template, localtemplate"
+    End Select
+
+  Endif
+
   Quit
 
 End
@@ -48,7 +84,12 @@ Public Sub PrintPlaces()
   Print "[Folders]"
   Print "Settings Default Dir -> " & mPlaces.GetSettingDefaultDir()
   Print "Examples Directory -> " & mPlaces.GetDirExamples()
-  Print "Downloaded projects -> "
+  Print "Downloaded projects -> " & mPlaces.GetDirSrc()
+  Print "Template: " & mPlaces.GetDirTemplate()
+  Print "Local Template: " & mPlaces.GetDirLocalTemplate()
+  Print mPlaces.GetDataDir()
+  Print mPlaces.GetCacheDir()
+  Print mPlaces.GetConfigDir()
   Print gb.NewLine & "[Programs]"
   Print "gbs3 " & mPlaces.GetGbsVersion() & " -> " & mPlaces.GetGbsPath()
   Print "gbx3 " & mPlaces.GetGbxVersion() & " -> " & mPlaces.GetGbxPath()

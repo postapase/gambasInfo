@@ -39,8 +39,6 @@ Public Sub GetGbxVersion() As String
 
 End
 
-'gbx3 -V
-
 Public Sub GetPathGambas3() As String
 
   Dim sPath As String
@@ -81,5 +79,53 @@ Public Sub GetDirExamples() As String
   sDirExamples = System.Path &/ "share/gambas" & Split(System.Version, ".")[0] & "/examples"
 
   Return sDirExamples
+
+End
+
+Public Sub GetDirTemplate() As String
+
+  Return System.Path &/ "share/" & "gambas" & System.Version &/ "template"
+
+End
+
+Public Sub GetDirLocalTemplate() As String
+
+  Return GetDataDir() &/ "gambas3/template/"
+
+End
+
+Public Sub GetDirSrc() As String
+
+  Return GetDataDir() &/ "gambas3/src/"
+
+End
+
+Public Sub GetDataDir() As String
+
+  Return GetDir("XDG_DATA_HOME", User.Home &/ ".local/share")
+
+End
+
+Public Sub GetConfigDir() As String
+
+  Return GetDir("XDG_CONFIG_HOME", User.Home &/ ".config")
+
+End
+
+Public Sub GetCacheDir() As String
+
+  Return GetDir("XDG_CACHE_HOME", User.Home &/ ".cache")
+
+End
+
+Public Sub GetDir(sVar As String, sDefault As String) As String
+
+  Dim sPath As String = Env[sVar]
+
+  If sPath Then
+    Return sPath
+  Else
+    Return sDefault
+  Endif
 
 End
